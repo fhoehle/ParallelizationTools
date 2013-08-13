@@ -3,17 +3,6 @@
 import commands,getopt,sys
 import Queue
 import multiprocessing
-#commandLine parsing
-opts, args = getopt.getopt(sys.argv[1:], '',['jobFile=','numProcesses='])
-jobFile=None
-numProcesses=3
-for opt,arg in opts:
- #print opt , " :   " , arg
- if opt in  ("--jobFile"):
-  jobFile=arg
- if opt in  ("--numProcesses"):
-  numProcesses=int(arg)
-
 class Worker(multiprocessing.Process):
  
     def __init__(self,
@@ -71,7 +60,18 @@ def execute(jobs, num_processes=2):
     return results
  
 if __name__ == "__main__":
- 
+    #commandLine parsing
+    opts, args = getopt.getopt(sys.argv[1:], '',['jobFile=','numProcesses='])
+    jobFile=None
+    numProcesses=3
+    for opt,arg in opts:
+       #print opt , " :   " , arg
+       if opt in  ("--jobFile"):
+         jobFile=arg
+       if opt in  ("--numProcesses"):
+         numProcesses=int(arg)
+
+
     # generate stuff to do
     jobs = []
     file = open(jobFile)
