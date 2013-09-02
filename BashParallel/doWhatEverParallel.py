@@ -25,7 +25,8 @@ class Worker(multiprocessing.Process):
                 job = self.work_queue.get_nowait()
             except Queue.Empty:
                 break
- 	    print "it me the worker with job ",job
+ 	    print "executing ",job
+            sys.stdout.flush()
             # the actual processing
             statusOutput = commands.getstatusoutput(job)
  	    print "done with job ",job
