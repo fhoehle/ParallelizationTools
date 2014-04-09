@@ -20,16 +20,6 @@ class parallelRunner(object):
     inputFiles=process.source.fileNames.value()
     newNumInputFiles = len(inputFiles)/self.numJobs
     newInputFilesList =  [inputFiles[i:i+newNumInputFiles] for i in range(0, len(inputFiles), newNumInputFiles)]
-#    remainingFiles = len(inputFiles) - self.numJobs*newNumInputFiles
-#    newNumInputFiles=newNumInputFiles+1
-#    newInputFilesList = []
-#    for i in range(self.numJobs):
-#      newInputFilesList.append(list(inputFiles[i*newNumInputFiles:(i+1)*newNumInputFiles]))
-#      if remainingFiles > 0:
-#        remainingFiles=remainingFiles-1
-#        if remainingFiles == 0:
-#          newNumInputFiles=newNumInputFiles-1 
-    #output module names
     outputMods = {}
     for outItem in process.outputModules.iteritems():
       outputMods[outItem[0]]=re.match('([^\.]*)(\.[^ \.]*)',outItem[1].fileName.value())
