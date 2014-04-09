@@ -19,26 +19,27 @@ class parallelRunner(object):
     ## adapting input modules
     inputFiles=process.source.fileNames.value()
     newNumInputFiles = len(inputFiles)/self.numJobs
-    remainingFiles = len(inputFiles) - self.numJobs*newNumInputFiles
-    newNumInputFiles=newNumInputFiles+1
-    newInputFilesList = []
-    for i in range(self.numJobs):
-      newInputFilesList.append(list(inputFiles[i*newNumInputFiles:(i+1)*newNumInputFiles]))
-      if remainingFiles > 0:
-        remainingFiles=remainingFiles-1
-        if remainingFiles == 0:
-          newNumInputFiles=newNumInputFiles-1 
+    newInputFilesList =  [inputFiles[i:i+newNumInputFiles] for i in range(0, len(inputFiles), newNumInputFiles)]
+#    remainingFiles = len(inputFiles) - self.numJobs*newNumInputFiles
+#    newNumInputFiles=newNumInputFiles+1
+#    newInputFilesList = []
+#    for i in range(self.numJobs):
+#      newInputFilesList.append(list(inputFiles[i*newNumInputFiles:(i+1)*newNumInputFiles]))
+#      if remainingFiles > 0:
+#        remainingFiles=remainingFiles-1
+#        if remainingFiles == 0:
+#          newNumInputFiles=newNumInputFiles-1 
     #output module names
     outputMods = {}
     for outItem in process.outputModules.iteritems():
       outputMods[outItem[0]]=re.match('([^\.]*)(\.[^ \.]*)',outItem[1].fileName.value())
     cfgFileList=[]
     
-    for job in range(self.numJobs):
+    for job,inputFs in enumerate(newInputFilesList):
       regexCfgFile = re.match('([^\.]*)(\.[^\.]*)',self.cfgFileName)
       newCfgFileName=regexCfgFile.group(1)+"_"+str(job)+regexCfgFile.group(2)
       #setting source inputFile names
-      process.source.fileNames.setValue(newInputFilesList[job])
+      process.source.fileNames.setValue(inputFs)
       #setting file names for output modules
       for outItem in process.outputModules.iteritems():
         outItem[1].fileName.setValue(outputMods[outItem[0]].group(1)+"_"+str(job)+outputMods[outItem[0]].group(2))
