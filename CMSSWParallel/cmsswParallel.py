@@ -1,27 +1,22 @@
 #!/usr/bin/env python
 # script for parallel cmssw jobs
-import getopt,sys,imp,re
+import sys,imp,re,argparse
 #commandLine parsing
-myArgs=['cfgFileName=','numProcesses=','numJobs=']
-opts, args = getopt.getopt(sys.argv[1:], '',myArgs)
+parser = argparse.ArgumentParser()
+parser.add_argument('--cfgFileName',required=True,help='cfg file which should be executed in parallel')
+parser.add_argument('--numProcesses',default=2,help='number of processes which run parallel')
+parser.add_argument('--numJobs',default=2,help='number of jobs in total')
+parser.add_argument('--where',default='',help='where should it be executed and the output stored')
+parser.add_argument('--usage',action='store_true',default=False,help='help message')
+args=parser.parse_args()
+if args.usage:
+  parser.print_help()
+  sys.exit(0)
 print sys.argv
-cfgFileName=None
-numProcesses=2
-numJobs=2
-for opt,arg in opts:
- if opt in ("--cfgFileName"):
-  cfgFileName=str(arg)
-  sys.argv.remove('--cfgFileName')
-  sys.argv.remove(arg)
- if opt in ("--numProcesses"):
-  sys.argv.remove('--numProcesses')
-  numProcesses=int(arg)
-  sys.argv.remove(arg)
- if opt in ("--numJobs"):
-  numJobs=int(arg)
-  sys.argv.remove('--numJobs')
-  sys.argv.remove(str(arg))
-print sys.argv
+cfgFileName=args.cfgFileName
+numProcesses=args.numProcesses
+numJobs=args.numJobs
+where = args.where
 print "You launched CMSSW parallel with ",numProcesses," processes in parallel and this ",cfgFileName," config file, and ",numJobs," in total" 
 cfgFile = open(cfgFileName,'r')
 cfgFileLoaded = imp.load_source('cfg',cfgFileName,cfgFile)
