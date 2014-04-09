@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # script for parallel cmssw jobs
-import sys,imp,re,argparse
+import sys,imp,re,argparse,os
 ###################
 class parallelRunner(object):
   def __init__(self,cfgFileName,numProcesses,numJobs,where,debug):
@@ -11,18 +11,18 @@ class parallelRunner(object):
     self.debug = debug
   def createCfgs(self):
     if self.debug:
-      print "You launched CMSSW parallel with ",numProcesses," processes in parallel and this ",cfgFileName," config file, and ",numJobs," in total" 
-    cfgFile = open(cfgFileName,'r')
-    cfgFileLoaded = imp.load_source('cfg',cfgFileName,cfgFile)
+      print "You launched CMSSW parallel with ",self.numProcesses," processes in parallel and this ",self.cfgFileName," config file, and ",self.numJobs," in total" 
+    cfgFile = open(self.cfgFileName,'r')
+    cfgFileLoaded = imp.load_source('cfg',self.cfgFileName,cfgFile)
     cfgFile.close()
     process=cfgFileLoaded.process
     ## adapting input modules
     inputFiles=process.source.fileNames.value()
-    newNumInputFiles = len(inputFiles)/numJobs
-    remainingFiles = len(inputFiles) - numJobs*newNumInputFiles
+    newNumInputFiles = len(inputFiles)/self.numJobs
+    remainingFiles = len(inputFiles) - self.numJobs*newNumInputFiles
     newNumInputFiles=newNumInputFiles+1
     newInputFilesList = []
-    for i in range(numJobs):
+    for i in range(self.numJobs):
       newInputFilesList.append(list(inputFiles[i*newNumInputFiles:(i+1)*newNumInputFiles]))
       if remainingFiles > 0:
         remainingFiles=remainingFiles-1
@@ -34,8 +34,8 @@ class parallelRunner(object):
       outputMods[outItem[0]]=re.match('([^\.]*)(\.[^ \.]*)',outItem[1].fileName.value())
     cfgFileList=[]
     
-    for job in range(numJobs):
-      regexCfgFile = re.match('([^\.]*)(\.[^\.]*)',cfgFileName)
+    for job in range(self.numJobs):
+      regexCfgFile = re.match('([^\.]*)(\.[^\.]*)',self.cfgFileName)
       newCfgFileName=regexCfgFile.group(1)+"_"+str(job)+regexCfgFile.group(2)
       #setting source inputFile names
       process.source.fileNames.setValue(newInputFilesList[job])
@@ -56,10 +56,11 @@ class parallelRunner(object):
     import commands
     logFile= self.jobFileName.strip()+"_log.txt"
     if self.debug:
-      print "using log file"
-    statusOutput = commands.getstatusoutput("./doWhatEverParallel.py --jobFile "+self.jobFileName+" --numProcesses "+str(self.numProcesses)+" >& "+logFile)
+      print "using log file",logFile
+    statusOutput = commands.getstatusoutput(os.getenv('CMSSW_BASE')+"/ParallelizationTools/BashParallel/doWhatEverParallel.py --jobFile "+self.jobFileName+" --numProcesses "+str(self.numProcesses)+" >& "+logFile)
     if self.debug:
       print "status in total ",statusOutput[0]
+    return statusOutput[0]
 #########################
 if __name__ == "__main__":
   #commandLine parsing
