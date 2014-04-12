@@ -40,9 +40,11 @@ class parallelRunner(object):
     ## do it parallel
     self.jobFileName=regexCfgFile.group(1)+"_jobs.txt"
     jobFile = open(self.jobFileName,'w')
-    for cfg in cfgFileList:
-      jobFile.write("cmsRun "+cfg+" >& "+cfg+"_output.txt\n")
+    cmds = ["cmsRun "+cfg+" >& "+cfg+"_output.txt" for cfg in cfgFileList]
+    for c in cmds:
+      jobFile.write(c+"\n")
     jobFile.close()
+    return cmds
   def runParallel(self):
     import commands
     logFile= self.jobFileName.strip()+"_log.txt"
