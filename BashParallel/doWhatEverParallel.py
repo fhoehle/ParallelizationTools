@@ -1,6 +1,6 @@
 #! /usr/bin/env python
  
-import commands,getopt,sys
+import commands,argparse,sys
 import Queue
 import multiprocessing
 class Worker(multiprocessing.Process):
@@ -62,25 +62,19 @@ def execute(jobs, num_processes=2):
  
 if __name__ == "__main__":
     #commandLine parsing
-    opts, args = getopt.getopt(sys.argv[1:], '',['jobFile=','numProcesses='])
-    jobFile=None
-    numProcesses=3
-    for opt,arg in opts:
-       #print opt , " :   " , arg
-       if opt in  ("--jobFile"):
-         jobFile=arg
-       if opt in  ("--numProcesses"):
-         numProcesses=int(arg)
-
-
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--jobFile',required=True,help='file with jobs per line')
+    parser.add_argument('--numProcesses',default=3,help="number of processes running parallel")
+    parser.add_argument('--debug',default=False,action='store_true',help='debugging')
+    args = parser.parse_args()
+    numProcesses=int(args.numProcesses)
+    jobFile = args.jobFile
     # generate stuff to do
     jobs = []
-    file = open(jobFile)
-    jobs = file.readlines()
     with open(jobFile) as f:
      jobs = f.read().splitlines()
-
-    print jobs 
+    if args.debug:
+      print "list to be processed:","\t\n".join(jobs)
     # run
     results = execute(jobs,numProcesses)
  
