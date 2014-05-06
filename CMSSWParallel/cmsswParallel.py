@@ -19,7 +19,7 @@ class parallelRunner(object):
     ## adapting input modules
     inputFiles=process.source.fileNames.value()
     newNumInputFiles = len(inputFiles)/self.numJobs
-    newInputFilesList =  [inputFiles[i:i+newNumInputFiles] for i in range(0, len(inputFiles), newNumInputFiles)]
+    newInputFilesList =  [inputFiles[i:i+newNumInputFiles] for i in range(0, len(inputFiles), newNumInputFiles)] if newNumInputFiles > 0 else inputFiles 
     outputMods = {}
     for outItem in process.outputModules.iteritems():
       outputMods[outItem[0]]=re.match('([^\.]*)(\.[^ \.]*)',outItem[1].fileName.value())
