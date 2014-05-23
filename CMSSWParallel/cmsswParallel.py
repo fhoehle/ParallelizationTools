@@ -47,13 +47,20 @@ class parallelRunner(object):
     return cmds
   def runParallel(self):
     import commands
+    import subprocess
     logFile= self.jobFileName.strip()+"_log.txt"
     if self.debug:
       print "using log file",logFile
-    statusOutput = commands.getstatusoutput(os.getenv('CMSSW_BASE')+"/ParallelizationTools/BashParallel/doWhatEverParallel.py --jobFile "+self.jobFileName+" --numProcesses "+str(self.numProcesses)+" >& "+logFile)
-    if self.debug:
-      print "status in total ",statusOutput[0]
-    return statusOutput[0]
+    stopKey = 'stopKeyDONE'
+    command = os.getenv('CMSSW_BASE')+"/ParallelizationTools/BashParallel/doWhatEverParallel.py --jobFile "+self.jobFileName+" --numProcesses "+str(self.numProcesses)+" >& "+logFile+' ;echo "returnCodeCrab: "$?"!"; echo "'+stopKey+'"'
+    subPStdOut = [];exitCode=None
+    subPr = subprocess.Popen([command],bufsize=1 , stdin=open(os.devnull),shell=True,stdout=(open(self.stdoutTMPfile,'w') if hasattr(self,'stdoutTMPfile') and self.stdoutTMPfile else subprocess.PIPE ),env=os.environ)
+    #statusOutput = commands.getstatusoutput(os.getenv('CMSSW_BASE')+"/ParallelizationTools/BashParallel/doWhatEverParallel.py --jobFile "+self.jobFileName+" --numProcesses "+str(self.numProcesses)+" >& "+logFile)
+    for i,line in enumerate(iter(  subPr.stdout.readline ,stopKey+'\n')):
+      if 'returnCodeCrab' in line:
+        crabExitCode=line
+      subPStdOut.append(line)
+    return " ".join(subPStdOut)
 #########################
 if __name__ == "__main__":
   #commandLine parsing
